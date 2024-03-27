@@ -41,9 +41,7 @@ class Bot:
 
         file_info = self.telegram_bot_client.get_file(msg['photo'][-1]['file_id'])
         data = self.telegram_bot_client.download_file(file_info.file_path)
-        #logger.info(f'data - file_info.file_path : {data}')
         folder_name = file_info.file_path.split('/')[0]
-        #logger.info(f'folder_name : {folder_name}')
 
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
@@ -70,7 +68,6 @@ class Bot:
 
 class QuoteBot(Bot):
     def handle_message(self, msg):
-        #return 'ok'
         logger.info(f'Incoming message: {msg}')
 
         if msg["text"] != 'Please don\'t quote me':
@@ -78,30 +75,44 @@ class QuoteBot(Bot):
 
 
 class ImageProcessingBot(Bot):
+    def __init__(self, token, telegram_chat_url):
+        super().__init__(token, telegram_chat_url)
+
     def handle_message(self, msg):
         #return 'ok'
         logger.info(f'Incoming message: {msg}')
-        my_caption = msg["caption"]
+
         if self.is_current_msg_photo(msg):
             caption_values = ['Blur', 'Contour', 'Rotate', 'Segment', 'Salt and pepper', 'Concat']
-            if my_caption not in caption_values:
+            if "caption" not in msg:
+                self.send_text(msg['chat']['id'], 'Please provide valid captions')
+            elif "caption" in msg and msg["caption"] not in caption_values:
                 self.send_text(msg['chat']['id'], 'the caption should be one of the following: Blur, Contour, Rotate, Segment, Salt and pepper, Concat')
                 logger.info('Invalid Caption')
             else:
-                logger.info('.........starting to apply the filter.........')
-
-                saved_photo_path = self.download_user_photo(msg)
-                new_img = Img(saved_photo_path)
-                logger.info(f'Caption: {my_caption}')
-                filter_function_name = my_caption.lower()
-                if hasattr(Img, filter_function_name):
-                    filter_function = getattr(new_img, filter_function_name)
-                    filter_function()
-                    new_path = new_img.save_img()
-                    self.send_photo(msg['chat']['id'], new_path)
-                    self.send_text(msg['chat']['id'], f'photo filtered with: {my_caption} successfully')
-
-                    time.sleep(0.5)
+                try:
+                    logger.info('.........starting to apply the filter.........')
+                    my_caption = msg["caption"]
+                    saved_photo_path = self.download_user_photo(msg)
+                    logger.info(f'saved_photo_path : {saved_photo_path}')
+                    logger.info('.........download photo.........')
+                    new_img = Img(saved_photo_path)
+                    logger.info('.........saved photo.........')
+                    logger.info(f'Caption: {my_caption}')
+                    filter_function_name = my_caption.lower()
+                    logger.info(f'filter_function_name : {filter_function_name}')
+                    if hasattr(Img, filter_function_name):
+                        logger.info('.....inside if.....')
+                        filter_function = getattr(new_img, filter_function_name)
+                        filter_function()
+                        new_path = new_img.save_img()
+                        logger.info('.....filtered.....')
+                        self.send_photo(msg['chat']['id'], new_path)
+                        logger.info('.....sending filtered image.....')
+                        self.send_text(msg['chat']['id'], f'photo filtered with: {my_caption} successfully')
+                except Exception as e:
+                    print("An unexpected error occurred: ", e)
+            time.sleep(0.5)
         else:
             self.send_text(msg['chat']['id'], 'please upload a photo')
 
