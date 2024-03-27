@@ -102,7 +102,6 @@ class ImageProcessingBot(Bot):
                     filter_function_name = my_caption.lower()
                     logger.info(f'filter_function_name : {filter_function_name}')
                     if hasattr(Img, filter_function_name):
-                        logger.info('.....inside if.....')
                         filter_function = getattr(new_img, filter_function_name)
                         filter_function()
                         new_path = new_img.save_img()
@@ -110,8 +109,11 @@ class ImageProcessingBot(Bot):
                         self.send_photo(msg['chat']['id'], new_path)
                         logger.info('.....sending filtered image.....')
                         self.send_text(msg['chat']['id'], f'photo filtered with: {my_caption} successfully')
+                except OSError as e:
+                    self.send_text(msg['chat']['id'], f'An OSError occurred: {e}')
+                    logger.error(f'An unexpected error occurred: {e}')
                 except Exception as e:
-                    print("An unexpected error occurred: ", e)
+                    self.send_text(msg['chat']['id'], f'An unexpected error occurred: {e}')
             time.sleep(0.5)
         else:
             self.send_text(msg['chat']['id'], 'please upload a photo')
