@@ -1,5 +1,6 @@
 from pathlib import Path
 from matplotlib.image import imread, imsave
+import random
 
 
 def rgb2gray(rgb):
@@ -63,12 +64,37 @@ class Img:
         self.data = res
 
     def salt_n_pepper(self):
-        # TODO remove the `raise` below, and write your implementation
-        raise NotImplementedError()
+        # the approach : randomly change pixels into 0 or 255 .
+        # we need to decide the noise_amount we want to add .
+        noise_amount = 0.3
+
+        for i in range(len(self.data)):
+
+            for j in range(len(self.data[i])):
+                rnd = random.random()
+                if rnd < noise_amount/2:
+                    self.data[i][j] = 0 # black noise
+                elif rnd > 1 - noise_amount/2:
+                    self.data[i][j] = 255 # white noise
+                else:
+                    pass # no noise, keep going
 
     def concat(self, other_img, direction='horizontal'):
-        # TODO remove the `raise` below, and write your implementation
-        raise NotImplementedError()
+        # explaining the approach
+        # if the direction is horizontal as given then I need to make sure the 2 images has the same row numbers .
+        # otherwise I'll need to adjust the dimensions by adding 0 or 255 rows to the image with fewer rows.
+        matrix1 = self.data
+        matrix2 = other_img.data
+        num_rows_matrix1 = len(matrix1)
+        num_rows_matrix2 = len(matrix2)
+        if num_rows_matrix1 == num_rows_matrix2:
+            res = []
+            for i in range(len(matrix1)):
+                matrix1[i].extend(matrix2[i]) # Concatenate rows horizontally
+            self.data = matrix1
+        else:
+            raise RuntimeError("can not concatenate images of different dimensions")
+
 
     def segment(self):
         # TODO remove the `raise` below, and write your implementation

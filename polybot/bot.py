@@ -79,9 +79,7 @@ class ImageProcessingBot(Bot):
         super().__init__(token, telegram_chat_url)
 
     def handle_message(self, msg):
-        #return 'ok'
         logger.info(f'Incoming message: {msg}')
-
         if self.is_current_msg_photo(msg):
             caption_values = ['Blur', 'Contour', 'Rotate', 'Segment', 'Salt and pepper', 'Concat']
             if "caption" not in msg:
@@ -91,27 +89,23 @@ class ImageProcessingBot(Bot):
                 logger.info('Invalid Caption')
             else:
                 try:
-                    logger.info('.........starting to apply the filter.........')
+                    logger.info('...starting to apply the filter...')
                     my_caption = msg["caption"]
+                    logger.info('...downloading image...')
                     saved_photo_path = self.download_user_photo(msg)
-                    logger.info(f'saved_photo_path : {saved_photo_path}')
-                    logger.info('.........download photo.........')
+                    logger.info('...saving image...')
                     new_img = Img(saved_photo_path)
-                    logger.info('.........saved photo.........')
-                    logger.info(f'Caption: {my_caption}')
                     filter_function_name = my_caption.lower()
-                    logger.info(f'filter_function_name : {filter_function_name}')
-                    if hasattr(Img, filter_function_name):
+                    if hasattr(new_img, filter_function_name):
                         filter_function = getattr(new_img, filter_function_name)
+                        logger.info('...applying the filter...')
                         filter_function()
                         new_path = new_img.save_img()
-                        logger.info('.....filtered.....')
+                        logger.info('...sending the filtered image...')
                         self.send_photo(msg['chat']['id'], new_path)
-                        logger.info('.....sending filtered image.....')
-                        self.send_text(msg['chat']['id'], f'photo filtered with: {my_caption} successfully')
-                except OSError as e:
-                    self.send_text(msg['chat']['id'], f'An OSError occurred: {e}')
-                    logger.error(f'An unexpected error occurred: {e}')
+                        self.send_text(msg['chat']['id'], f'Image was filtered with {my_caption} filter successfully')
+                except OSError as oe:
+                    self.send_text(msg['chat']['id'], f'An OSError occurred: {oe}')
                 except Exception as e:
                     self.send_text(msg['chat']['id'], f'An unexpected error occurred: {e}')
             time.sleep(0.5)
