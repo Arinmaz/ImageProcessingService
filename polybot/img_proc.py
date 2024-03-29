@@ -52,12 +52,17 @@ class Img:
             self.data[i] = res
 
     def rotate(self):
+        # explanation: each row would become a column. (last row -> first column)
+        # so I iterate over the rows (reversed, starting from the last one),
+        # and I take always the first element of the row, push it into my new row.
+        # this way my row becomes my column ....
+
         res = []
         for i in range(len(self.data[0])):
             rotated_row = []
-            for sublist in reversed(self.data):
+            for sublist in reversed(self.data): # iterating over the rows backwards
                 if sublist:
-                    rotated_row.append(sublist[0])
+                    rotated_row.append(sublist[0]) # takes the first element of each row
                     del sublist[0]
 
             res.append(rotated_row)
@@ -66,13 +71,13 @@ class Img:
     def salt_n_pepper(self):
         # the approach : randomly change pixels into 0 or 255 .
         # we need to decide the noise_amount we want to add .
-        noise_amount = 0.3
+        noise_amount = 0.2
         for i in range(len(self.data)):
             for j in range(len(self.data[i])):
                 rnd = random.random()
-                if rnd < noise_amount/2:
+                if rnd < noise_amount:
                     self.data[i][j] = 0 # black noise
-                elif rnd > 1 - noise_amount/2:
+                elif rnd > 1 - noise_amount:
                     self.data[i][j] = 255 # white noise
                 else:
                     pass # no noise, keep going
@@ -94,5 +99,10 @@ class Img:
 
 
     def segment(self):
-        # TODO remove the `raise` below, and write your implementation
-        raise NotImplementedError()
+
+        for i in range(len(self.data)):
+            for j in range(len(self.data[i])):
+                if self.data[i][j] > 100:
+                    self.data[i][j] = 255
+                else:
+                    self.data[i][j] = 0
