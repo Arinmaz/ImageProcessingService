@@ -67,9 +67,7 @@ class Img:
         # the approach : randomly change pixels into 0 or 255 .
         # we need to decide the noise_amount we want to add .
         noise_amount = 0.3
-
         for i in range(len(self.data)):
-
             for j in range(len(self.data[i])):
                 rnd = random.random()
                 if rnd < noise_amount/2:
@@ -88,7 +86,6 @@ class Img:
         num_rows_matrix1 = len(matrix1)
         num_rows_matrix2 = len(matrix2)
         if num_rows_matrix1 == num_rows_matrix2:
-            res = []
             for i in range(len(matrix1)):
                 matrix1[i].extend(matrix2[i]) # Concatenate rows horizontally
             self.data = matrix1

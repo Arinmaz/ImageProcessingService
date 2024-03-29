@@ -82,10 +82,10 @@ class ImageProcessingBot(Bot):
         logger.info(f'Incoming message: {msg}')
         if self.is_current_msg_photo(msg):
             caption_values = ['Blur', 'Contour', 'Rotate', 'Segment', 'Salt and pepper', 'Concat']
-            if "caption" not in msg:
+            if not msg.get('caption'):
                 self.send_text(msg['chat']['id'], 'Please provide valid captions')
-            elif "caption" in msg and msg["caption"] not in caption_values:
-                self.send_text(msg['chat']['id'], 'the caption should be one of the following: Blur, Contour, Rotate, Segment, Salt and pepper, Concat')
+            elif msg.get('caption') and msg.get('caption') not in caption_values:
+                self.send_text(msg['chat']['id'], "the caption should be one of the following: " + ', '.join(caption_values))
                 logger.info('Invalid Caption')
             else:
                 try:
@@ -111,5 +111,3 @@ class ImageProcessingBot(Bot):
             time.sleep(0.5)
         else:
             self.send_text(msg['chat']['id'], 'please upload a photo')
-
-
